@@ -1,36 +1,36 @@
-Mi propuesta como solución al problema es usar Spark streaming como framework de procesamiento en paralelo, el módulo de Apache Apark que permite 
-el procesamiento de eventos en "tiempo real" (la latencia real es de 1s approx, 
-pero para este caso de uso es más que suficiente). He elegido Spark por varios motivos:
+My proposal as a solution to the problem is to use Spark streaming as a parallel processing framework, the Apache Apark module that allows
+the processing of events in "real time" (the real latency is approx 1s,
+but for this use case it is more than enough). I have chosen Spark for several reasons:
 
-1. #### Escalabilidad de la arquitectura. 
+1. #### Scalability. 
 
-Un cluster de Spark puede configurarse para procesar un alto volumen
-de datos (terabytes) tan solo añadiendo más nodos y reconfigurando el tuneo de memoria, numero de ejecutores, etc., con lo que no tendremos ningún problema de escalabilidad.
+A Spark cluster can be configured to process a high volume
+of data (terabytes) just by adding more nodes and reconfiguring the memory tuning, number of executors, etc., with which we will not have any scalability problem.
 
-2. #### Integración con Kafka mediante Structured Streaming.
+2. #### Integration with Kafka via Structured Streaming.
 
-La introducción de Spark 2.4 trajo importantes mejoras al procesamiento de datos estructurados con la DataFrame API y el módulo Structured Streaming, que permite tratar a los eventos ingestados en tiempo real como si fueran filas de un dataframe infinito.
-Gran parte de la funcionalidad de procesamiento en batch se conserva en Structured Streaming. 
+The introduction of Spark 2.4 brought significant improvements to structured data processing with the DataFrame API and the Structured Streaming module, which allows events ingested in real time to be treated as if they were rows of an infinite dataframe.
+Much of the batch processing functionality is retained in Structured Streaming.
 
-3. #### Integración con multiples bases de datos SQL y NoSQL, data lakes.
+3. #### Integration with SQL and NoSQL databases, and data lakes.
 
-Si bien Spark está pensado para ir de la mano de un data lake por su capacidad para procesar un elevado volumen de datos, también puede interaccionar
-con bases de datos SQL (MySQL, Postgres) y NoSQL (MongoDB, Cassandra).
-
-
-Para exponer los datos he elegido MySQL porque dispongo de un servidor local que me permite testar la funcionalidad
-del pipeline. En un entorno de produccion eligiría una base de datos de formato columnar, como Redshift o BigQuey, puesto
-que son mas eficientes para el análisis de datos.
+Although Spark is designed to go hand in hand with a data lake due to its ability to process a high volume of data, it can also interact
+with SQL (MySQL, Postgres) and NoSQL (MongoDB, Cassandra) databases.
 
 
-# Description del proceso (en MacOS)
+To expose the data I have chosen MySQL because I have a local server that allows me to test the functionality
+of the pipeline. In a production environment I would choose a columnar format database, such as Redshift or BigQuey, since
+which are more efficient for data analysis.
 
-1. #### Instalar el servidor local de MySQL
+
+# Workflow description (MacOS)
+
+1. #### Iinstall local MySQL server
 ```brew install mysql```
 
-2. #### Crear la base de datos "seedtag" desde cualquier cliente de SQL o la linea de comandos (yo uso DBeaver)
+2. #### Create the "seedtag" database from any SQL client or the command line (I use DBeaver)
 
-3. #### Definir la tabla "kafka_streams" usando el siguiente DDL:
+3. #### Define the "kafka streams" table using the following DLL:
 ```CREATE TABLE `kafka_streams` (
   `window_start` timestamp NULL DEFAULT NULL,
   `window_end` timestamp NULL DEFAULT NULL,
@@ -40,35 +40,35 @@ que son mas eficientes para el análisis de datos.
   `top_5` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;```
 
-4. #### Instalar Hadoop y Spark en modo local
+4. #### Install Hadoop and Spark locally
 ````xcode-select --install````
 ````brew cask install java````
 ````brew install scala````
 ````brew install apache-spark````
 
-Abrir la terminal y ejecutar el comando  ````spark-shell````o  ````pyspark```` que nos permite lanzar consulas interactivas en Spark desde Scala o Python, respectivamente. Si se abre la shell, hemos completado la instalación.
+Open the terminal and execute the following commands  ````spark-shell````or  ````pyspark```` which allows us to launch interactive Spark queries from Scala or Python, respectively. If the shell opens, we have completed the installation.
 
-5. #### Lanzar el Spark job con ````spark-submit````
+5. #### Submit Spark job with ````spark-submit````
 
-Para lanzar un job en streaming solo tenemos que proporcionar las coordenadas Maven del paquete del driver que
-habilita la conexión al cluster de Kafka y al driver de MySQL. Primero nos aseguramos que hemos levantado los contenedores de Kafka y el streaming service, tal cual se indica en las instrucciones de la tarea.
-Importante: en modo local los procesos driver y ejecutores de la app Spark comparten la memoria del driver, por eso la elevo a 3g (por si acaso).
-Entramos en el directorio donde esta el app.py.
+To launch a job in streaming we only have to provide the Maven coordinates of the driver package that
+enables the connection to the Kafka cluster and the MySQL driver. First we make sure that we have started the Kafka containers and the streaming service, as indicated in the instructions of the task.
+Important: in local mode the driver and executor processes of the Spark app share the driver memory, that's why I raise it to 3g (just in case).
+We enter the directory where the app.py is.
 
 ````cd your_working_directory````
 
-Y ejecutamos el comando spark-submit:
+And execute the spark-submit command:
 
 ````spark-submit --conf spark.driver.memory=3g --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.1.1,mysql:mysql-connector-java:8.0.16 app.py````
 
 
-Para monitorizar el proceso, vemos como en la terminal aparecen mensajes sobre la duración de cada batch, o podemos ir refrescando la tabla de MySQL y veremos ir apareciendo los datos.
-Adjunto varias consultas y una captura de pantalla de DBeaver para demostrar que sí funciona.
+To monitor the process, we see how messages about the duration of each batch appear in the terminal, or we can refresh the MySQL table and we will see the data appear.
+I am attaching several queries and a screenshot of DBeaver to demonstrate that it does work.
 
 
-En resumen, esta es una solución para procesar datos en streaming con Spark leyendo desde un topic de Kafka y usando una base
-de datos MySQL como data sink para visualización y análisis. Este tipo de soluciones son muy habituales en big data por su capacidad para
-escalar a altos volumenes de datos y su simplicidad para el desarrollo y despliegue.
+In summary, this is a solution to process streaming data with Spark by reading from a Kafka topic and using a database
+MySQL data as a data sink for visualization and analysis. These types of solutions are very common in big data due to their ability to
+scale to high volumes of data and its simplicity for development and deployment.
 
 
 
