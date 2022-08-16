@@ -125,3 +125,4 @@ if __name__ == "__main__":
         .start()
 
     query.awaitTermination() # no termina a no ser que se produzca un error o sea interrumpida manualmente.
+

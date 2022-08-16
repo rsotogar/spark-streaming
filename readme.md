@@ -1,7 +1,7 @@
 ### Overview
 
 This ETL pipeline was built as part of a series of interviews for a senior data engineer role in which I had to build
-a data system that would ingest, process and store real time events in Kafka.
+a data system that would process real time messages from a Kafka topic.
 
 I show an example of how such streaming workflow could be set up in a scalable, robust and easy-to-integrate manner. 
 Structured Streaming is a module of Apache Spark that can ingest and process
